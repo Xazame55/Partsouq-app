@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e2233">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>قطع الغيار - PartSouq</title>
+<style>
+  :root{--navy:#0e2233;--steel:#dce6ee;--hazard:#f2c230;--mid:#5b7388}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--navy);color:var(--steel);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+       display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;padding:24px;text-align:center}
+  img{width:96px;height:96px;border-radius:22px}
+  h1{margin:0;font-size:1.5rem}
+  p{margin:0;color:var(--mid);max-width:30ch;line-height:1.7}
+  .btn{display:block;width:min(320px,100%);padding:14px 18px;border-radius:12px;border:0;font:inherit;font-weight:700;
+       font-size:1.05rem;text-decoration:none;cursor:pointer}
+  .primary{background:var(--hazard);color:var(--navy)}
+  .ghost{background:transparent;color:var(--steel);border:1.5px solid var(--mid)}
+  .btn:focus-visible{outline:3px solid var(--steel);outline-offset:3px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+  <img src="icon-192.png" alt="">
+  <h1>كتالوج قطع الغيار</h1>
+  <p id="msg">افتح الكتالوج الرسمي مباشرة من هنا.</p>
+  <a class="btn primary" id="open" href="https://partsouq.com/en/">فتح الكتالوج</a>
+  <button class="btn ghost" id="install" hidden>تثبيت على الهاتف</button>
+<script>
+  const URL_SITE = 'https://partsouq.com/en/';
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+  // عند التشغيل من الأيقونة المثبتة: انتقل مباشرة إلى الكتالوج
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (standalone && !location.search.includes('stay')) {
+    document.getElementById('msg').textContent = 'جارٍ فتح الكتالوج...';
+    location.replace(URL_SITE);
+  }
+
+  let deferred;
+  const btn = document.getElementById('install');
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
+  btn.addEventListener('click', async () => {
+    if (!deferred) return;
+    deferred.prompt(); await deferred.userChoice; deferred = null; btn.hidden = true;
+  });
+  addEventListener('appinstalled', () => { btn.hidden = true; });
+</script>
+</body>
+</html>
